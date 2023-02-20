@@ -112,10 +112,10 @@ async def make_multiple_api_requests_async(urls_lst=[], data_dicts_lst=[], heade
     api_responses = await asyncio.gather(*api_job_lsts)
     return api_responses
 
-async def create_task_api_request_call_async(url, data_dict=None, header_dict={'Content-Type': 'application/json'}, method='POST', retries=3, duration_before_retry=[1,2,3], verbose=False):
+def create_task_api_request_call(url, data_dict=None, header_dict={'Content-Type': 'application/json'}, method='POST', retries=3, duration_before_retry=[1,2,3], verbose=False):
     return asyncio.create_task(make_api_request_async(url=url, method=method, retries=retries, duration_before_retry=duration_before_retry, data_dict=data_dict, header_dict=header_dict, verbose=verbose))
 
-async def create_task_mult_api_request_call_async(urls_lst=[], data_dicts_lst=[], header_dicts_lst=[{'Content-Type': 'application/json'}], methods_lst=[], retries_lst=[1], duration_before_retry_lst=[[1]], verbose=False):
+def create_task_mult_api_request_call(urls_lst=[], data_dicts_lst=[], header_dicts_lst=[{'Content-Type': 'application/json'}], methods_lst=[], retries_lst=[1], duration_before_retry_lst=[[1]], verbose=False):
     return asyncio.create_task(make_multiple_api_requests_async(urls_lst=urls_lst, data_dicts_lst=data_dicts_lst, header_dicts_lst=header_dicts_lst, methods_lst=methods_lst, retries_lst=retries_lst, duration_before_retry_lst=duration_before_retry_lst, verbose=verbose))
 
 
@@ -191,5 +191,5 @@ async def make_post_api_request_async(url, data_dict=None, header_dict={'Content
             'methodCode': response.status
         }
     
-async def create_task_post_api_request_call_async(url, data_dict=None, header_dict={'Content-Type': 'application/json'}, retries=3, duration_before_retry=[1,2,3], verbose=False):
+def create_task_post_api_request_call(url, data_dict=None, header_dict={'Content-Type': 'application/json'}, retries=3, duration_before_retry=[1,2,3], verbose=False):
     return asyncio.create_task(make_post_api_request_async(url=url, retries=retries, duration_before_retry=duration_before_retry, data_dict=data_dict, header_dict=header_dict, verbose=verbose))
