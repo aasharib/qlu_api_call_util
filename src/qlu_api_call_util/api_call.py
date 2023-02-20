@@ -4,8 +4,9 @@ import aiohttp
 from urllib.parse import urlparse
 from .utility import is_url, is_allowed_method, create_url_for_get_query, generate_retry_duration_list, ALLOWED_METHODS, SingleCallMethodCode, MultiCallMethodCode
 
-async def make_api_request_async(url, method='POST', retries=3, duration_before_retry=[1], data_dict=None, header_dict={}):
-    print("API called")
+async def make_api_request_async(url, method='POST', retries=3, duration_before_retry=[1], data_dict=None, header_dict={}, verbose=False):
+    if verbose:
+        print("API called")
     if not is_url(url):
         return {
             'statusCode': SingleCallMethodCode.ERROR_URL.value
@@ -45,11 +46,13 @@ async def make_api_request_async(url, method='POST', retries=3, duration_before_
             try:
                 #request a session using given method, url and data_dict if any
                 async with session.request(method, url, data=data_dict, headers=header_dict) as response:
-                    print(response.status)
+                    if verbose:
+                        print(response.status)
                     #response 
                     if response.status == 200:
                         #json_resp = await response.json()
-                        print("API Finished")
+                        if verbose:
+                            print("API Finished")
                         return {
                             'statusCode': SingleCallMethodCode.NO_ERROR.value,
                             'methodCode': response.status,
@@ -60,17 +63,19 @@ async def make_api_request_async(url, method='POST', retries=3, duration_before_
                         response_text = await response.text()
                         print(f"API {url} request failed with status {response.status}: {response_text}")
             except aiohttp.ClientError as e:
-                print(f"API: {url} request failed with error: {e}")
-            print(f'Waiting {duration_before_retry[i]} second before retrying API call {url}')
+                if verbose:
+                    print(f"API: {url} request failed with error: {e}")
+            if verbose:
+                print(f'Waiting {duration_before_retry[i]} second before retrying API call {url}')
             await asyncio.sleep(duration_before_retry[i])  # Wait N seconds before retrying
-        print(f"API: {url} request failed after {retries} retries.")
+        if verbose:
+            print(f"API: {url} request failed after {retries} retries.")
         return {
             'statusCode': SingleCallMethodCode.ERROR_REQ_FAILED.value,
             'methodCode': response.status
         }
     
-async def make_multiple_api_requests_async(urls_lst=[], methods_lst=[], retries_lst=[1], duration_before_retry_lst=[[1]], data_dicts_lst=[], header_dicts_lst=[{'Content-Type': 'application/json'}]):
-    
+async def make_multiple_api_requests_async(urls_lst=[], methods_lst=[], retries_lst=[1], duration_before_retry_lst=[[1]], data_dicts_lst=[], header_dicts_lst=[{'Content-Type': 'application/json'}], verbose=False):
     if not type(urls_lst).__name__ == 'list' or not all([is_url(url) for url in urls_lst]):
         return {
                 'statusCode': MultiCallMethodCode.ERROR_URL_PARAM.value
@@ -103,6 +108,6 @@ async def make_multiple_api_requests_async(urls_lst=[], methods_lst=[], retries_
     
     api_job_lsts = []
     for idx, url in enumerate(urls_lst):
-        api_job_lsts.append(make_api_request_async(url=url, method=methods_lst[idx], retries=retries_lst[idx], duration_before_retry=duration_before_retry_lst[idx], data_dict=data_dicts_lst[idx], header_dict=header_dicts_lst[idx]))
+        api_job_lsts.append(make_api_request_async(url=url, method=methods_lst[idx], retries=retries_lst[idx], duration_before_retry=duration_before_retry_lst[idx], data_dict=data_dicts_lst[idx], header_dict=header_dicts_lst[idx]), verbose=verbose)
     api_responses = await asyncio.gather(*api_job_lsts)
     return api_responses
