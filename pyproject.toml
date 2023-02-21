@@ -4,13 +4,17 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qlu_api_call_util"
-version = "0.0.4"
+version = "0.0.7"
 authors = [
   { name="Aasharib", email="aasharib01@gmail.com" },
 ]
 description = "A small example package"
 readme = "README.md"
 requires-python = ">=3.7"
+dependencies=[
+        "aiohttp",
+        "asyncio"
+    ]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
