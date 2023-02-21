@@ -2,6 +2,7 @@ import json
 import asyncio
 import aiohttp
 from urllib.parse import urlparse
+from multiprocessing.pool import ThreadPool
 from .utility import is_url, is_allowed_method, create_url_for_get_query, generate_retry_duration_list, ALLOWED_METHODS, SingleCallMethodCode, MultiCallMethodCode
 
 async def make_api_request_async(url, data_dict=None, header_dict={'Content-Type': 'application/json'}, method='POST', retries=3, duration_before_retry=[1], verbose=False, is_resp_json=True, session_timeout=300, request_timeout=300):
@@ -207,3 +208,9 @@ async def make_post_api_request_async(url, data_dict=None, header_dict={'Content
     
 def create_task_post_api_request_call(url, data_dict=None, header_dict={'Content-Type': 'application/json'}, retries=3, duration_before_retry=[1,2,3], verbose=False, is_resp_json=True):
     return asyncio.create_task(make_post_api_request_async(url=url, retries=retries, duration_before_retry=duration_before_retry, data_dict=data_dict, header_dict=header_dict, verbose=verbose))
+
+def create_async_post_request(url, data_dict=None, header_dict={'Content-Type': 'application/json'}, retries=3, duration_before_retry=[1,2,3], verbose=False, is_resp_json=False):
+    pool = ThreadPool(processes=1)
+    TASK = make_api_request_async(url, data_dict=data_dict, header_dict=header_dict, retries=retries, duration_before_retry=duration_before_retry, verbose=False)
+    async_call = pool.apply_async(asyncio.run, (TASK,))
+    return async_call
